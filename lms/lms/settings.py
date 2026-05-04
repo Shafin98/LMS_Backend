@@ -29,7 +29,9 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    'shafins-lms-backend.onrender.com'
+    'shafins-lms-backend.onrender.com',
+    'localhost',
+    '127.0.0.1',
 ]
 
 CSRF_TRUSTED_ORIGINS = [
@@ -79,7 +81,8 @@ REST_FRAMEWORK = {
 }
 
 CORS_ALLOWED_ORIGINS = [
-    "https://shafins-lms-app-react.onrender.com"
+    "https://shafins-lms-app-react.onrender.com",
+    "http://localhost:5173",
 ]
 
 SIMPLE_JWT = {
