@@ -57,6 +57,24 @@ class ForgotPasswordView(APIView):
     permission_classes = []
 
     def post(self, request):
+        email = request.data.get("email")
+
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return Response({"error": "User not found"}, status=400)
+
+        token_obj = PasswordResetToken.objects.create(user=user)
+        reset_link = f"https://shafins-lms-app-react.onrender.com/reset-password/{token_obj.token}"
+
+        # temporarily return link in response instead of emailing
+        return Response({
+            "message": "Password reset link generated",
+            "reset_link": reset_link
+        })
+    permission_classes = []
+
+    def post(self, request):
         try:
             email = request.data.get("email")
             print("STEP 1 - EMAIL RECEIVED:", email)
