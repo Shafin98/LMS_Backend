@@ -94,8 +94,11 @@ class ResetPasswordView(APIView):
 
         try:
             token_obj = PasswordResetToken.objects.get(token=token)
-        except PasswordResetToken.DoesNotExist:
-            return Response({"error": "Invalid token"}, status=400)
+        except Exception as e:
+            print("EMAIL ERROR:", str(e))  # this will show in Render logs
+            return Response({"error": f"Failed to send email: {str(e)}"}, status=500)
+        # except PasswordResetToken.DoesNotExist:
+        #     return Response({"error": "Invalid token"}, status=400)
 
         if token_obj.is_expired():
             return Response({"error": "Token expired"}, status=400)
