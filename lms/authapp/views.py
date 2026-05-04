@@ -2,7 +2,7 @@
 from django.shortcuts import render
 from .models import *
 from .serializers import *
-from django.core.mail import send_mail
+from django.core.mail import send_mail, get_connection
 from .permissions import *
 from django.template.loader import render_to_string
 #rest
@@ -72,6 +72,17 @@ class ForgotPasswordView(APIView):
         })
 
         try:
+            # open connection with explicit timeout
+            connection = get_connection(
+                backend='django.core.mail.backends.smtp.EmailBackend',
+                host='smtp.office365.com',
+                port=587,
+                username=os.getenv('EMAIL_HOST_USER'),
+                password=os.getenv('EMAIL_HOST_PASSWORD'),
+                use_tls=True,
+                timeout=10  # fail after 10 seconds instead of hanging forever
+            )
+
             send_mail(
                 subject="Reset Your LMS Password",
                 message=f"Reset your password here: {reset_link}",
@@ -79,11 +90,13 @@ class ForgotPasswordView(APIView):
                 recipient_list=[email],
                 html_message=html_message,
                 fail_silently=False,
+                connection=connection,
             )
             return Response({"message": "Password reset email sent successfully"})
 
         except Exception as e:
-            return Response({"error": "Failed to send email. Please try again."}, status=500)
+            print("EMAIL ERROR:", str(e))
+            return Response({"error": f"Email failed: {str(e)}"}, status=500)
     
 class ResetPasswordView(APIView):
     permission_classes = []
