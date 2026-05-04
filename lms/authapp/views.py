@@ -64,7 +64,7 @@ class ForgotPasswordView(APIView):
             return Response({"error": "User not found"}, status=400)
 
         token_obj = PasswordResetToken.objects.create(user=user)
-        reset_link = f"https://your-frontend-name.onrender.com/reset-password/{token_obj.token}"
+        reset_link = f"https://shafins-lms-app-react.onrender.com/reset-password/{token_obj.token}"
 
         html_message = render_to_string('password_reset_email.html', {
             'username': user.username,
