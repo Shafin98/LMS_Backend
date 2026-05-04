@@ -56,6 +56,69 @@ class ForgotPasswordView(APIView):
     permission_classes = []
 
     def post(self, request):
+        try:
+            email = request.data.get("email")
+            print("STEP 1 - EMAIL RECEIVED:", email)
+
+            try:
+                user = User.objects.get(email=email)
+                print("STEP 2 - USER FOUND:", user.username)
+            except User.DoesNotExist:
+                return Response({"error": "User not found"}, status=400)
+
+            token_obj = PasswordResetToken.objects.create(user=user)
+            print("STEP 3 - TOKEN CREATED:", token_obj.token)
+
+            reset_link = f"https://shafins-lms-app-react.onrender.com/reset-password/{token_obj.token}"
+
+            try:
+                html_message = render_to_string('password_reset_email.html', {
+                    'username': user.username,
+                    'reset_link': reset_link,
+                })
+                print("STEP 4 - TEMPLATE RENDERED OK")
+            except Exception as e:
+                print("STEP 4 FAILED - TEMPLATE ERROR:", str(e))
+                return Response({"error": "Template error"}, status=500)
+
+            try:
+                connection = get_connection(
+                    backend='django.core.mail.backends.smtp.EmailBackend',
+                    host='smtp.gmail.com',
+                    port=587,
+                    username=os.getenv('EMAIL_HOST_USER'),
+                    password=os.getenv('EMAIL_HOST_PASSWORD'),
+                    use_tls=True,
+                    timeout=10
+                )
+                print("STEP 5 - CONNECTION CREATED")
+
+                send_mail(
+                    subject="Reset Your LMS Password",
+                    message=f"Reset your password here: {reset_link}",
+                    from_email=None,
+                    recipient_list=[email],
+                    html_message=html_message,
+                    fail_silently=False,
+                    connection=connection,
+                )
+                print("STEP 6 - EMAIL SENT OK")
+                return Response({"message": "Password reset email sent successfully"})
+
+            except Exception as e:
+                import traceback
+                traceback.print_exc()
+                print("STEP 5/6 FAILED - EMAIL ERROR:", str(e))
+                return Response({"error": f"Email failed: {str(e)}"}, status=500)
+
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            print("UNEXPECTED ERROR:", str(e))
+            return Response({"error": "Unexpected error"}, status=500)
+    permission_classes = []
+
+    def post(self, request):
         email = request.data.get("email")
 
         try:
