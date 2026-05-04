@@ -78,7 +78,7 @@ REST_FRAMEWORK = {
     ),
 }
 
-CORS_ORIGIN_ALLOW_ALL = [
+CORS_ALLOWED_ORIGINS = [
     "https://shafins-lms-app-react.onrender.com"
 ]
 
