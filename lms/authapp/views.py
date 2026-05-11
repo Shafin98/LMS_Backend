@@ -63,10 +63,21 @@ class ForgotPasswordView(APIView):
         token_obj = PasswordResetToken.objects.create(user=user)
         reset_link = f"https://shafins-lms-app-react.onrender.com/reset-password/{token_obj.token}"
 
-        return Response({
-            "message": "Password reset link generated",
-            "reset_link": reset_link
+        html_message = render_to_string("password_reset_email.html", {
+            "username": user.username,
+            "reset_link": reset_link,
         })
+
+        send_mail(
+            subject="Password Reset Request",
+            message=f"Hi {user.username},\n\nReset your password here: {reset_link}\n\nThis link expires in 1 hour.",
+            from_email=os.getenv("DEFAULT_FROM_EMAIL"),
+            recipient_list=[email],
+            html_message=html_message,
+            fail_silently=False,
+        )
+
+        return Response({"message": "Password reset link sent to your email"})
 
 class ResetPasswordView(APIView):
     permission_classes = []
