@@ -35,7 +35,7 @@ ALLOWED_HOSTS = [
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    'https://shafins-lms-backend.onrender.com'
+    'https://lms-frontend-chi-flax.vercel.app'
 ]
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
@@ -81,7 +81,7 @@ REST_FRAMEWORK = {
 }
 
 CORS_ALLOWED_ORIGINS = [
-    "https://shafins-lms-app-react.onrender.com",
+    "https://lms-frontend-chi-flax.vercel.app",
     "http://localhost:5173",
 ]
 
