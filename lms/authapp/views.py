@@ -1,5 +1,6 @@
 #general
 import os
+import resend
 from django.shortcuts import render
 from .models import *
 from .serializers import *
@@ -49,6 +50,7 @@ class ProfileView(APIView):
         serializer.save()
         return Response(serializer.data)
 
+
 class ForgotPasswordView(APIView):
     permission_classes = []
 
@@ -63,21 +65,26 @@ class ForgotPasswordView(APIView):
         token_obj = PasswordResetToken.objects.create(user=user)
         reset_link = f"https://shafins-lms-app-react.onrender.com/reset-password/{token_obj.token}"
 
-        html_message = render_to_string("password_reset_email.html", {
-            "username": user.username,
-            "reset_link": reset_link,
+        html_message = render_to_string('password_reset_email.html', {
+            'username': user.username,
+            'reset_link': reset_link,
         })
 
-        send_mail(
-            subject="Password Reset Request",
-            message=f"Hi {user.username},\n\nReset your password here: {reset_link}\n\nThis link expires in 1 hour.",
-            from_email=os.getenv("DEFAULT_FROM_EMAIL"),
-            recipient_list=[email],
-            html_message=html_message,
-            fail_silently=False,
-        )
+        try:
+            resend.api_key = os.getenv("RESEND_API_KEY")
 
-        return Response({"message": "Password reset link sent to your email"})
+            resend.Emails.send({
+                "from": "LMS App <onboarding@resend.dev>",
+                "to": [email],
+                "subject": "Reset Your LMS Password",
+                "html": html_message,
+            })
+
+            return Response({"message": "Password reset email sent successfully"})
+
+        except Exception as e:
+            print("EMAIL ERROR:", str(e))
+            return Response({"error": f"Email failed: {str(e)}"}, status=500)
 
 class ResetPasswordView(APIView):
     permission_classes = []

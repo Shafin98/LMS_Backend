@@ -10,5 +10,7 @@ Markdown==3.10.2
 pillow==12.2.0
 PyJWT==1.7.1
 python-dotenv==1.2.2
+requests==2.33.1
+resend==2.30.0
 sqlparse==0.5.5
 tzdata==2025.3
